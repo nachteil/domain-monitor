@@ -1,8 +1,5 @@
 package mx;
 
-/**
- * Created by masterix on 23.11.2016.
- */
 public class Domain {
 
     protected String url;
@@ -14,10 +11,6 @@ public class Domain {
 
     public void setStatus(Integer status) {
         this.status = status;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     public String getUrl(){
