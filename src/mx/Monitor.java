@@ -3,29 +3,36 @@ package mx;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
-/**
- * Created by masterix on 08.10.2016.
- */
 public class Monitor {
-    protected ISource source;
+    private ArrayList<Domain> domainList;
     private long delayInMs;
 
-    public void setSource(ISource s){
-        source = s;
+    public Monitor(ArrayList<Domain> domainList, long delayInMs) {
+        this.domainList = domainList;
+        this.delayInMs = delayInMs;
     }
 
-    public void setDelayInMs(long delay){
-        delayInMs = delay;
+    public ArrayList<Domain> getDomainListWithStatuses() throws HostException
+    {
+        try{
+            observe();
+        } catch (InterruptedException | IOException e){
+            throw new HostException("Wystąpił błąd z pobraniem statusu dla domen");
+        }
+        return domainList;
     }
 
-    public void observe() throws InterruptedException, IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL("http://google.com").openConnection();
-        connection.setInstanceFollowRedirects(true);
-        System.out.println("Response code:" + connection.getResponseCode());
-        connection.disconnect();
-        /*while (true){
+    private void observe() throws InterruptedException, IOException {
+
+        for (Domain domain : domainList) {
+            HttpURLConnection connection = (HttpURLConnection) new URL(domain.getUrl()).openConnection();
+            connection.setInstanceFollowRedirects(true);
+            domain.setStatus(connection.getResponseCode());
+            connection.disconnect();
             Thread.sleep(delayInMs);
-        }*/
+
+        }
     }
 }
