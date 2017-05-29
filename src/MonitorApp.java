@@ -1,7 +1,6 @@
-import mx.Monitor;
-import mx.TextFileSource;
+import mx.*;
 
-import java.io.IOException;
+import java.util.ArrayList;
 
 public class MonitorApp {
     public static void main(String[] args) {
@@ -20,28 +19,27 @@ public class MonitorApp {
                 filename = args[1];
             }
         }
-        System.out.printf("Delay: %dms", delayInMs);
+        System.out.printf("Delay: %dms\r\n", delayInMs);
 
         // prepare source
-        TextFileSource tfs = new TextFileSource();
-        try {
-            tfs.setFilenameAndRead(filename);
-        } catch (IOException e) {
-            System.err.println(e.getLocalizedMessage());
+        ArrayList<Domain> domainList = new ArrayList<>();
+        try{
+            TextFileSource textFileSource = new TextFileSource(filename);
+            domainList = textFileSource.getDomainList();
+        } catch (SourceNotFoundException ex){
+            System.out.println(ex.getLocalizedMessage());
             System.exit(1);
         }
 
-        // run monitor
-        Monitor m = new Monitor();
-        m.setSource(tfs);
-        m.setDelayInMs(delayInMs);
-
         try {
-            m.observe();
-        } catch (InterruptedException e) {
+            Monitor domainMonitor = new Monitor(domainList, delayInMs);
+            domainList = domainMonitor.getDomainListWithStatuses();
+        } catch(HostException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+
+        for(Domain d: domainList){
+            System.out.println("Response code for domain " + d.getUrl() + " is: " + d.getStatus());
         }
     }
 }
