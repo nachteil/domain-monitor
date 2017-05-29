@@ -17,22 +17,24 @@ public class Monitor {
     public ArrayList<Domain> getDomainListWithStatuses() throws HostException
     {
         try{
-            observe();
+            checkDomainsStatuses();
         } catch (InterruptedException | IOException e){
             throw new HostException("Wystąpił błąd z pobraniem statusu dla domen");
         }
         return domainList;
     }
 
-    private void observe() throws InterruptedException, IOException {
-
+    private void checkDomainsStatuses() throws InterruptedException, IOException {
         for (Domain domain : domainList) {
-            HttpURLConnection connection = (HttpURLConnection) new URL(domain.getUrl()).openConnection();
-            connection.setInstanceFollowRedirects(true);
-            domain.setStatus(connection.getResponseCode());
-            connection.disconnect();
+            checkDomainStatus(domain);
             Thread.sleep(delayInMs);
-
         }
+    }
+
+    private void checkDomainStatus(Domain domain) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) new URL(domain.getUrl()).openConnection();
+        connection.setInstanceFollowRedirects(true);
+        domain.setStatus(connection.getResponseCode());
+        connection.disconnect();
     }
 }
